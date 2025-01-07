@@ -1,6 +1,17 @@
 from flask import Flask, render_template, request, redirect, session
+import mysql.connector
 
 app = Flask(__name__)
+
+#setting up SQL connection
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root",
+    database="db_team08"
+)
+cursor = mydb.cursor()
+
 
 @app.route('/')
 def homepage():
