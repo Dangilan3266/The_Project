@@ -8,9 +8,10 @@ mydb = mysql.connector.connect(
     host="localhost",
     user="root",
     password="root",
-    database="db_team08"
+    database="group_008"
 )
 cursor = mydb.cursor()
+
 
 
 @app.route('/')
@@ -23,7 +24,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        if temp_db.get(username) == password:       # connection between db and the login method
+        if 'temp_db'.get(username) == password:       # connection between db and the login method
             session['username'] = username
             return redirect("/")
         else:
