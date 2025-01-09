@@ -1,6 +1,4 @@
-from flask import Flask, redirect, request, render_template
-import mysql.connector
-from App.Routes import *
+from main import *
 
 
 

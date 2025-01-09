@@ -1,0 +1,34 @@
+<html>
+
+<head>
+<!--connect the css to the html -->
+<link rel='stylesheet' type = 'text/css' href = "{{url_for('static',filename='welcomepage_style.css')}}">
+</head>
+
+<body class="bg-image">
+<!--setting the nuvbar -->
+	<div class="topnav">
+	</div>
+<div class="picture">
+</div>
+
+
+	<h1> Welcome to Fashion TAU</h1>
+<!--set a message that coms from the python by jinja  -->
+	<div class="message">
+		{% if message %}
+			{{ message }}
+		{% endif %}
+	</div>
+
+<!--links to login and register  -->
+<table class='homepage_menu'>
+		<tr class = 'menu_tr'>
+			<td class='menu_td'>
+				<a class='homepageform' href=/login>Log In</a>
+			</td>
+			<td class='menu_td'>
+				<a class='homepageform' href=/SignUp>Sign Up</a>
+			</td>
+		<tr>
+</table>
