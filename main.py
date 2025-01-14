@@ -1,18 +1,19 @@
 from flask import Flask, render_template, request, redirect, session
 import mysql.connector
-import pymysql
-from flask_session import Session
+from flask_session.__init__ import Session
 import App.Item
 
 app = Flask(__name__)
 
+
 def open_connection():
-    connection = pymysql.connect(host='localhost',
+    connection = mysql.connector.connect(host='localhost',
                                          user='root',
                                          password='root',
                                          database='group_008')    # Creating connection & Connect to the MySQL server:
     cursor = connection.cursor()                                # Creating cursor:
     return connection, cursor
+
 
 def close_connection(connection, cursor):
     connection.commit()                                         # commit the transaction
@@ -31,9 +32,12 @@ app.config["SESSION_FILE_THRESHOLD"] = 100
 Session(app)
 
 # welcome page. here you can login and register as librarian/member
+
+
 @app.route('/', methods=["GET"])
 def welcomepage():
     return render_template("Welcome_Page.html")
+
 
 
 @app.route("/login", methods=["POST", "GET"])

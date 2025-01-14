@@ -1,5 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-from pymysql.cursors import Cursor
+import mysql.connector
+from datetime import datetime
 
 
 class Item:
@@ -134,15 +134,15 @@ class Item:
     #בדיקה אם קיים קמפיין
 
 
-class User:
+#class User:
         # מודא קיום בטבלה
         # רישום
         # רכישה
 
 
-class Purchase:
-    # בדיקת מלאי DB
-    # עדכון DB
+#class Purchase:
+        # בדיקת מלאי DB
+        # עדכון DB
 
     #building DB columns
 
