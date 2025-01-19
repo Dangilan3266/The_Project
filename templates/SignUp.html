@@ -2,50 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Fashion TAU</title>
-     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='signup.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-<!-- Signup Form -->
-        <div>
-            <h1>Welcome to Fashion TAU</h1>
-            <h3>Create a New Account</h3>
-            <div class="message">
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
+    <div class="bg-image"></div>
+    <div class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="TAU Fashion Logo">
+</div>
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1>Welcome to Ski Fashion TAU</h1>
+                <h3>Create a New Account</h3>
             </div>
-            <form  action="/SignUp" method="post">
-                <div class="form-group">
-                    <label for="name">name:</label>
-                    <input type="text" id="name" name="Name" required>
+
+            {% if message %}
+                <div class="message {% if 'success' in message.lower() %}success{% else %}error{% endif %}">
+                    <p>{{ message }}</p>
                 </div>
+            {% endif %}
+
+            <form action="/SignUp" method="post">
                 <div class="form-group">
-                    <label for="signup-email">Email:</label>
-                    <input type="email" id="signup-email" name="email" required>
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="Name" placeholder="Enter your full name" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="signup-password">Password:</label>
-                    <input type="password" id="signup-password" name="Password" required>
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="signup-DOB">Date Of Birth:</label>
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="Password" placeholder="Choose a strong password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-DOB">Date of Birth</label>
                     <input type="date" id="signup-DOB" name="DOB" min="1900-01-01" max="{{ today }}" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="signup-gender">Gender:</label>
+                    <label for="signup-gender">Gender</label>
                     <select id="signup-gender" name="Gender" required>
-                        <option value="">Select</option>
+                        <option value="">Select your gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label for="signup-faculty">Faculty:</label>
-                    <input type="text" id="signup-faculty" name="Faculty" required>
+                    <label for="signup-faculty">Faculty</label>
+                    <input type="text" id="signup-faculty" name="Faculty" placeholder="Enter your faculty" required>
                 </div>
-                <button type="submit" class="btn">Sign Up</button>
+
+                <button type="submit" class="submit-btn">Create Account</button>
             </form>
+
+            <div class="form-footer">
+                <p>Already have an account? <a href="/login">Sign in here</a></p>
+            </div>
         </div>
+    </div>
 </body>
 </html>
