@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Fashion TAU</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel='stylesheet' type='text/css' href="{{ url_for('static',filename='login.css') }}">
 </head>
-<body>
+<body class="bg-image">  <!-- Added bg-image class here -->
     <div class="container">
-        <h1>Welcome to Fashion TAU</h1>
-            <div class="message">
-                 {% if message %}
+        <h1>Welcome to Ski Fashion TAU</h1>
+        <div class="message">
+            {% if message %}
                 <p>{{ message }}</p>
             {% endif %}
-            </div>
+        </div>
         <!-- Login Form -->
         <form action="/login" method="POST">
             <h3>Login to Your Account</h3>
@@ -44,5 +44,3 @@
     </div>
 </body>
 </html>
-
-
