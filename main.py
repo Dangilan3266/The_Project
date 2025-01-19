@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
 import mysql.connector
 from flask_session.__init__ import Session
+from datetime import date
 import App.Item
 
 app = Flask(__name__)
@@ -75,6 +76,7 @@ def login():
 
 @app.route("/SignUp" ,methods=["POST", "GET"])
 def signup():
+    today = date.today().strftime('%Y-%m-%d')
     if request.method == "POST":
         email = request.form["email"]
         Name = request.form["Name"]
@@ -96,7 +98,7 @@ def signup():
         finally:
             close_connection(connection, cursor)
     else:
-        return render_template("SignUp.html")
+        return render_template("SignUp.html",today=today)
 
 
 @app.route("/Home_Page", methods=["POST", "GET"])
