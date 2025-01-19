@@ -18,10 +18,17 @@
                 <h1>Welcome to Ski Fashion TAU</h1>
                 <h3>Create a New Account</h3>
             </div>
+<<<<<<<<< Temporary merge branch 1
 
             {% if message %}
                 <div class="message {% if 'success' in message.lower() %}success{% else %}error{% endif %}">
                     <p>{{ message }}</p>
+=========
+            <form  action="/SignUp" method="post">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="Name" required>
+>>>>>>>>> Temporary merge branch 2
                 </div>
             {% endif %}
 

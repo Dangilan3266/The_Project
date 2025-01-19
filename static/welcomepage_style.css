@@ -129,17 +129,3 @@ div.content {
 	background-color: #EAA341;
 	color: white;
 }
-
-.logo {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 150px;  /* Adjust size as needed */
-    height: auto;
-    z-index: 1000;
-}
-
-.logo img {
-    width: 100%;
-    height: auto;
-}
