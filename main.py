@@ -1,7 +1,10 @@
+import datetime
+
 from flask import Flask, render_template, request, redirect, session
 import mysql.connector
 from flask_session.__init__ import Session
 import App.Item
+from datetime import date
 
 app = Flask(__name__)
 
@@ -53,18 +56,19 @@ def login():
             result = cursor.fetchone()  # Fetch a single result instead of all
             if result and result[0] == password:
                 session['email'] = email
-                return render_template("M_Home_Page.html")  # Correct template name
+                return redirect("/M_Home_Page")
 
             # Check if email exists in users
             cursor.execute("SELECT password FROM users WHERE email = %s", (email,))
             result = cursor.fetchone()  # Fetch a single result instead of all
             if result and result[0] == password:
                 session['email'] = email
-                return render_template("Home_Page.html")  # Correct template name
+                return redirect("/Home_Page")  # Correct template name
 
             # If no match found
-            message = 'Incorrect Login Details.'
-            return render_template("Login.html",message=message)
+            else:
+                message = 'Incorrect Login Details.'
+                return render_template("Login.html",message=message)
 
         finally:
             # Ensure connection is closed even if there's an error
@@ -75,6 +79,7 @@ def login():
 
 @app.route("/SignUp" ,methods=["POST", "GET"])
 def signup():
+    today = date.today().strftime("%Y-%m-%d")
     if request.method == "POST":
         email = request.form["email"]
         Name = request.form["Name"]
@@ -96,35 +101,161 @@ def signup():
         finally:
             close_connection(connection, cursor)
     else:
-        return render_template("SignUp.html")
+        return render_template("SignUp.html", today=today)
 
 
 @app.route("/Home_Page", methods=["POST", "GET"])
 def Home_Page():
+    if 'email' not in session:
+        return redirect("/")  # Redirect to log in if no session exists
+
+    connection, cursor = open_connection()
+
     if request.method == "POST":
-        connection, cursor = open_connection()
-        cursor.execute("SELECT * FROM garment")
+        try:
+            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+            items = cursor.fetchall()
+            for item in items:
+                item_id = int(item[0])  # G_ID
+                desired_quantity = int(request.form.get(f'quantity_{item_id}'))  # Get new quantity from the form
+                new_quantity = int(item[1]) - desired_quantity
+                cursor.execute("UPDATE Garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
+            message = "Thank You for Your Purchase"
+
+            # Fetch the updated items to reflect changes
+            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+            updated_items = cursor.fetchall()
+
+            # Update Transaction
+            email = session["email"]
+            transaction_date = datetime.datetime
+            cursor.execute("SELECT MAX(transaction_number) FROM transactions")
+            result = cursor.fetchone()
+            last_transaction_number = result[0] if result[0] is not None else 0  # Start from 0 if no transactions exist
+            new_transaction_number = last_transaction_number + 1  # Increment the number
+            cursor.execute("""
+                INSERT INTO transactions (Order_id, Date, Users_Email)
+                VALUES (%s, %s, %s)
+            """, (new_transaction_number, transaction_date, email))
+
+            # doesn't update transactions_garment - need to be done
+            connection.commit()
+
+        except Exception as e:
+            # Roll back in case of error
+            connection.rollback()
+            message = f"Error purchasing: {e}"
+            updated_items = []  # Return an empty list if an error occurs
+        finally:
+            close_connection(connection, cursor)
+        return render_template("Home_Page.html", message=message, items=updated_items)
+    else:
+        cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
         items = cursor.fetchall()
-        for item_id in request.form:
-            quantity = int(request.form[item_id])  # Extract quantity from the form
-            cursor.execute("SELECT * FROM garment WHERE G_ID = %s", (item_id,))
-            item = cursor.fetchone()
-            item_instance = App.Item(id=item[0], name=item[1], price=item[2],
-                                 quantity=item[3])  # Assuming you have an Item class
-            if item_instance.buy_item(quantity, cursor, connection):
-                print(f"Purchase successful for {item_instance.name}!")
-            else:
-                print(f"Not enough stock for {item_instance.name}.")
-
-        connection.close()
-        return "Purchase completed"
-    #return render_template("Home_Page.html" items=items)
-
+        close_connection(connection, cursor)
+        return render_template("Home_Page.html", items=items)
 
 
 @app.route("/M_Home_Page")
 def M_Home_Page():
     return render_template("M_Home_Page.html")
+
+@app.route('/Inventory_Update', methods=['GET', 'POST'])
+def inventory_update():
+    connection, cursor = open_connection()
+
+    if request.method == 'POST':
+        try:
+            # Fetch all items from the database
+            cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+            items = cursor.fetchall()
+
+            # Loop through the items and update their quantities based on the form input
+            for item in items:
+                item_id = item[0]  # G_ID
+                new_quantity = request.form.get(f'quantity_{item_id}')  # Get new quantity from the form
+
+                if new_quantity is not None:  # Check if a value was provided
+                    new_quantity = int(new_quantity)
+                    # Update the stock in the database
+                    cursor.execute(
+                        "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
+                        (new_quantity, item_id)
+                    )
+
+            # Commit the transaction
+            connection.commit()
+            message = "Inventory successfully updated!"
+
+            # Fetch the updated items to reflect changes
+            cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+            updated_items = cursor.fetchall()
+        except Exception as e:
+            # Roll back in case of error
+            connection.rollback()
+            message = f"Error updating inventory: {e}"
+            updated_items = []  # Return an empty list if an error occurs
+        finally:
+            close_connection(connection, cursor)
+
+        # Render the template with the updated items
+        return render_template('Inventory_Update.html', message=message, items=updated_items)
+
+    else:  # For GET requests, fetch items to display in the form
+        cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+        items = cursor.fetchall()
+        close_connection(connection, cursor)
+        return render_template('Inventory_Update.html', items=items)
+
+
+@app.route("/New_Item", methods=["POST", "GET"])
+def new_item():
+    if request.method == "POST":
+        item_name = request.form.get("Item_Name")
+        quantity = request.form.get("Quantity_in_stock")
+        campaign = request.form.get("Marketing_Campaign")
+        price = request.form.get("price")
+
+        # Validate input
+        if not item_name or not quantity or not price:
+            return render_template("New_Item.html", message="Please fill in all required fields.")
+
+        connection, cursor = open_connection()
+
+        try:
+            # Check if the product already exists
+            cursor.execute("SELECT * FROM garment WHERE Name = %s", (item_name,))
+            result = cursor.fetchone()
+            if result:
+                # Product already exists
+                return render_template(
+                    "New_Item.html",
+                    message="Product already exists! But hey, you can always update quantity or add a different one",
+                )
+
+            # Get the last garment ID
+            cursor.execute("SELECT MAX(G_ID) FROM garment")
+            result = cursor.fetchone()
+            last_garment_id = result[0] if result and result[0] is not None else 0
+            new_garment_id = last_garment_id + 1
+
+            # Insert the new product
+            cursor.execute(
+                "INSERT INTO garment (G_ID, Name, Quantity_in_stock, Marketing_Campaign, price) VALUES (%s, %s, %s, %s, %s)",
+                (new_garment_id, item_name, quantity, campaign, price),
+            )
+            connection.commit()
+            return render_template(
+                "New_Item.html", message="Product added successfully! You can add another one here:"
+            )
+        except Exception as e:
+            print(f"Error adding product: {e}")
+            return render_template(
+                "New_Item.html", message="An error occurred while adding the product, please try again"
+            )
+        finally:
+            close_connection(connection, cursor)
+    return render_template("New_Item.html")
 
 
 @app.errorhandler(404)
