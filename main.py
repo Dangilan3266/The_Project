@@ -36,7 +36,7 @@ Session(app)
 
 
 @app.route('/', methods=["GET"])
-def welcomepage():
+def welcome_page():
     return render_template("Welcome_Page.html")
 
 
@@ -100,13 +100,34 @@ def signup():
     else:
         return render_template("SignUp.html",today=today)
 
+
+@app.route("/Home_Page", methods=["POST", "GET"])
+def Home_Page():
+    if request.method == "POST":
+        connection, cursor = open_connection()
+        cursor.execute("SELECT * FROM garment")
+        items = cursor.fetchall()
+        for item_id in request.form:
+            quantity = int(request.form[item_id])  # Extract quantity from the form
+            cursor.execute("SELECT * FROM garment WHERE G_ID = %s", (item_id,))
+            item = cursor.fetchone()
+            item_instance = App.Item(id=item[0], name=item[1], price=item[2],
+                                 quantity=item[3])  # Assuming you have an Item class
+            if item_instance.buy_item(quantity, cursor, connection):
+                print(f"Purchase successful for {item_instance.name}!")
+            else:
+                print(f"Not enough stock for {item_instance.name}.")
+
+        connection.close()
+        return "Purchase completed"
+    #return render_template("Home_Page.html" items=items)
+
+
+
 @app.route("/M_Home_Page")
 def M_Home_Page():
     return render_template("M_Home_Page.html")
 
-@app.route("/Home_Page")
-def Home_Page():
-    return render_template("Home_Page.html")
 
 @app.errorhandler(404)
 def invalid_route(e):

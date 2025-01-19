@@ -1,5 +1,4 @@
-import mysql.connector
-from datetime import datetime
+from pymysql.cursors import Cursor
 
 
 class Item:
@@ -24,7 +23,7 @@ class Item:
         self.price = price
         self.image = image
 
-    def new_item(self, cursor, connection):
+    def new_item(self, id, quantity, name, campaign, price, image, cursor, connection):
         """
         Add a new item to the database.
 
@@ -47,10 +46,10 @@ class Item:
             cursor.execute(
                 "INSERT INTO garment (G_ID, Quantity, Name, Campaign, Price, Image) "
                 "VALUES (%s, %s, %s, %s, %s, %s)",
-                (self.id, self.quantity, self.name, self.campaign, self.price, self.image)
+                (id, quantity, name, campaign, price, image)
             )
             connection.commit()
-            return True
+            return True ## maybe we should return what was added or print on main
         except Exception as e:
             print(f"Error while adding new item: {e}")
             return False
@@ -134,16 +133,16 @@ class Item:
     #בדיקה אם קיים קמפיין
 
 
-#class User:
+class User:
         # מודא קיום בטבלה
         # רישום
         # רכישה
+    pass
 
-
-#class Purchase:
-        # בדיקת מלאי DB
-        # עדכון DB
-
+class Purchase:
+    # בדיקת מלאי DB
+    # עדכון DB
+    pass
     #building DB columns
 
 # function of init
