@@ -1,0 +1,172 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-x: hidden;
+}
+
+/* Heading */
+h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+/* Products grid with flexibility for large and small screens */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+/* Product card styling */
+.product-card {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+/* Hover effect to lift card */
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+}
+
+/* Product image */
+.product-image {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Price Styling */
+.price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #FF4C00;
+    margin-bottom: 15px;
+}
+
+/* Stock information */
+.stock {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* Call to Action Button */
+.submit-button {
+    background-color: #111;
+    color: #fff;
+    padding: 15px 50px;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 40px;
+    width: 100%;
+    max-width: 400px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for submit button */
+.submit-button:hover {
+    background-color: #FF4C00;
+}
+
+/* Quantity input field */
+.quantity-input {
+    width: 100px;
+    padding: 8px;
+    font-size: 1.1rem;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-top: 15px;
+    transition: border-color 0.3s ease;
+}
+
+/* Focus effect on quantity input */
+.quantity-input:focus {
+    border-color: #FF4C00;
+    outline: none;
+}
+
+/* Sale Tag Style */
+.campaign {
+    font-size: 1.1rem;
+    color: #FF4C00;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+    }
+
+    .product-card {
+        padding: 15px;
+    }
+
+    .price {
+        font-size: 1.2rem;
+    }
+
+    .quantity-input {
+        width: 90px;
+    }
+
+    .submit-button {
+        font-size: 1rem;
+        padding: 12px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .submit-button {
+        font-size: 0.9rem;
+        padding: 12px 25px;
+    }
+}

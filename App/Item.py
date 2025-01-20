@@ -54,7 +54,7 @@ class Item:
             print(f"Error while adding new item: {e}")
             return False
 
-    def update_stock(self, id, new_quantity, cursor, connection):
+    def update_stock(self, new_quantity, cursor, connection):
         """
         Update the stock quantity of the item.
 
@@ -69,7 +69,7 @@ class Item:
             # Update stock in the database
             cursor.execute(
                 "UPDATE garment SET Quantity = %s WHERE G_ID = %s",
-                (new_quantity, id)
+                (new_quantity, self.id)
             )
             connection.commit()
             self.quantity = new_quantity
