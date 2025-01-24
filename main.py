@@ -167,34 +167,44 @@ def Home_Page():
 def M_Home_Page():
     return render_template("M_Home_Page.html")
 
+
 @app.route('/Inventory_Update', methods=['GET', 'POST'])
 def inventory_update():
     connection, cursor = open_connection()
-
+    current_time = datetime.now()
     if request.method == 'POST':
         try:
             # Fetch all items from the database
             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
             items = cursor.fetchall()
 
-            # Loop through the items and update their quantities based on the form input
+            # Loop through the items and process only updated quantities
             for item in items:
                 item_id = item[0]  # G_ID
+                previous_quantity = item[1]  # Current stock quantity
                 new_quantity = request.form.get(f'quantity_{item_id}')  # Get new quantity from the form
 
                 if new_quantity is not None:  # Check if a value was provided
                     new_quantity = int(new_quantity)
-                    # Update the stock in the database
-                    cursor.execute(
-                        "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
-                        (new_quantity, item_id)
-                    )
 
-            # Commit the transaction
+                    if new_quantity != previous_quantity:  # Only process if the quantity has changed
+                        # Update the Quantity_in_stock in the garment table
+                        cursor.execute(
+                            "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
+                            (new_quantity, item_id)
+                        )
+
+                        # Log the update in the stock_update table
+                        cursor.execute(
+                            "INSERT INTO stock_update (Add_Quantity, Garment_G_ID, Update_Date) VALUES (%s, %s, %s)",
+                            (new_quantity, item_id, current_time)
+                        )
+
+            # Commit the transaction to save all changes
             connection.commit()
             message = "Inventory successfully updated!"
 
-            # Fetch the updated items to reflect changes
+            # Fetch the updated items to display in the table
             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
             updated_items = cursor.fetchall()
         except Exception as e:
@@ -212,7 +222,56 @@ def inventory_update():
         cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
         items = cursor.fetchall()
         close_connection(connection, cursor)
-        return render_template('Inventory_Update.html', items=items)
+        return render_template('Inventory_Update.html',items=items)
+
+
+
+# @app.route('/Inventory_Update', methods=['GET', 'POST'])
+# def inventory_update():
+#     connection, cursor = open_connection()
+#
+#     if request.method == 'POST':
+#         try:
+#             # Fetch all items from the database
+#             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+#             items = cursor.fetchall()
+#
+#             # Loop through the items and update their quantities based on the form input
+#             for item in items:
+#                 item_id = item[0]  # G_ID
+#                 new_quantity = request.form.get(f'quantity_{item_id}')  # Get new quantity from the form
+#
+#                 if new_quantity is not None:  # Check if a value was provided
+#                     new_quantity = int(new_quantity)
+#                     # Update the stock in the database
+#                     cursor.execute(
+#                         "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
+#                         (new_quantity, item_id)
+#                     )
+#
+#             # Commit the transaction
+#             connection.commit()
+#             message = "Inventory successfully updated!"
+#
+#             # Fetch the updated items to reflect changes
+#             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+#             updated_items = cursor.fetchall()
+#         except Exception as e:
+#             # Roll back in case of error
+#             connection.rollback()
+#             message = f"Error updating inventory: {e}"
+#             updated_items = []  # Return an empty list if an error occurs
+#         finally:
+#             close_connection(connection, cursor)
+#
+#         # Render the template with the updated items
+#         return render_template('Inventory_Update.html', message=message, items=updated_items)
+#
+#     else:  # For GET requests, fetch items to display in the form
+#         cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
+#         items = cursor.fetchall()
+#         close_connection(connection, cursor)
+#         return render_template('Inventory_Update.html', items=items)
 
 
 @app.route("/New_Item", methods=["POST", "GET"])
