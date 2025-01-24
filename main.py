@@ -133,16 +133,21 @@ def Home_Page():
             # Handle Transaction Logic
             email = session["email"]
             transaction_date = datetime.datetime.now()  # Correctly set date
-            cursor.execute("SELECT MAX(transaction_number) FROM transactions")
+            cursor.execute("SELECT MAX(order_id) FROM transactions")
             result = cursor.fetchone()
             last_transaction_number = result[0] if result[0] is not None else 0
             new_transaction_number = last_transaction_number + 1
 
+            # insert transaction to DB
             cursor.execute("""
                 INSERT INTO transactions (Order_id, Date, Users_Email)
                 VALUES (%s, %s, %s)
             """, (new_transaction_number, transaction_date, email))
-
+            # insert transaction garments to DB by pull from html
+            # cursor.execute("""
+            #     INSERT INTO transactions_garment (Order_id, Date, Users_Email)
+            #     VALUES (%s, %s, %s)
+            # """, (new_transaction_number, transaction_date, email))
             connection.commit()
         else:
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
