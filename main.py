@@ -95,7 +95,7 @@ def signup():
                 message = "This email has already registered"
                 return render_template('SignUp.html',message=message)
 
-            cursor.execute("INSERT INTO users(Email,User_Name, Password, DOB,Gender,Faculty) Values(%s,%s,%s,%s,%s,%s)",(email,Name,Password,DOB,Gender,Faculty))
+            cursor.execute("INSERT INTO users(Email,Name, Password, DOB,Gender,Faculty) Values(%s,%s,%s,%s,%s,%s)",(email,Name,Password,DOB,Gender,Faculty))
             connection.commit()
             return render_template("login.html", message="Registration successful! Please log in.")
         finally:
@@ -111,49 +111,51 @@ def Home_Page():
 
     connection, cursor = open_connection()
 
-    if request.method == "POST":
-        try:
+    try:
+        if request.method == "POST":
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             items = cursor.fetchall()
+
             for item in items:
                 item_id = int(item[0])  # G_ID
-                desired_quantity = int(request.form.get(f'quantity_{item_id}'))  # Get new quantity from the form
+                desired_quantity = int(
+                    request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
                 new_quantity = int(item[1]) - desired_quantity
-                cursor.execute("UPDATE Garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
-            message = "Thank You for Your Purchase"
+                if desired_quantity > 0:  # Only update for valid purchases
+                    cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
 
-            # Fetch the updated items to reflect changes
+            message = "Thank You for Your Purchase!"
+
+            # Fetch updated items for display
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             updated_items = cursor.fetchall()
 
-            # Update Transaction
+            # Handle Transaction Logic
             email = session["email"]
-            transaction_date = datetime.datetime
+            transaction_date = datetime.datetime.now()  # Correctly set date
             cursor.execute("SELECT MAX(transaction_number) FROM transactions")
             result = cursor.fetchone()
-            last_transaction_number = result[0] if result[0] is not None else 0  # Start from 0 if no transactions exist
-            new_transaction_number = last_transaction_number + 1  # Increment the number
+            last_transaction_number = result[0] if result[0] is not None else 0
+            new_transaction_number = last_transaction_number + 1
+
             cursor.execute("""
                 INSERT INTO transactions (Order_id, Date, Users_Email)
                 VALUES (%s, %s, %s)
             """, (new_transaction_number, transaction_date, email))
 
-            # doesn't update transactions_garment - need to be done
             connection.commit()
-
-        except Exception as e:
-            # Roll back in case of error
-            connection.rollback()
-            message = f"Error purchasing: {e}"
-            updated_items = []  # Return an empty list if an error occurs
-        finally:
-            close_connection(connection, cursor)
-        return render_template("Home_Page.html", message=message, items=updated_items)
-    else:
-        cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-        items = cursor.fetchall()
+        else:
+            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+            updated_items = cursor.fetchall()
+            message = None
+    except Exception as e:
+        connection.rollback()
+        message = f"Error: {e}"
+        updated_items = []
+    finally:
         close_connection(connection, cursor)
-        return render_template("Home_Page.html", items=items)
+
+    return render_template("Home_Page.html", message=message, products=updated_items)
 
 
 @app.route("/M_Home_Page")
