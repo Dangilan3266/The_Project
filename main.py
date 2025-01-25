@@ -1,10 +1,9 @@
-import datetime
-
 from flask import Flask, render_template, request, redirect, session
 import mysql.connector
 from flask_session.__init__ import Session
 import App.Item
-from datetime import date
+from datetime import date, datetime
+
 
 app = Flask(__name__)
 
@@ -132,7 +131,7 @@ def Home_Page():
 
             # Handle Transaction Logic
             email = session["email"]
-            transaction_date = datetime.datetime.now()  # Correctly set date
+            transaction_date = datetime.now()  # Correctly set date
             cursor.execute("SELECT MAX(order_id) FROM transactions")
             result = cursor.fetchone()
             last_transaction_number = result[0] if result[0] is not None else 0
