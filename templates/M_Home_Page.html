@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ski Clothing Shop - for managers</title>
+    <title>Ski Clothing Shop</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* General Styles */
@@ -118,6 +118,27 @@
             background-color: #0056b3;
         }
 
+        /* Log Out button styling */
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #f76c6c; /* Lighter orange-red color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none; /* Remove underline */
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #f34f4f; /* Darker orange-red */
+        }
+
         @media (max-width: 768px) {
             .product-image {
                 height: 200px;
@@ -126,8 +147,10 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to Ski Clothing Shop - for Managers</h1>
-
+    <h1>Welcome to Ski Clothing Shop - Manager Page</h1>
+    <div class="nav">
+        <a href="{{ url_for('welcome_page') }}" class="logout-button">Log Out</a>
+    </div>
     {% if message %}
         <p class="message">{{ message }}</p>
     {% endif %}
@@ -141,12 +164,12 @@
                      alt="{{ product[2] }}"
                      class="product-image">
                 <div class="product-details">
-                    <h3>{{ product[2] }}</h3>
-                    <p class="price">${{ product[4] }}</p>
-                    {% if product[4] %}
+                    <h3>{{ product[2] }}</h3> <!-- Assuming Name is in column index 2 -->
+                    <p class="price">${{ product[4] }}</p> <!-- Assuming price is in column index 3 -->
+                    {% if product[4] %} <!-- Assuming Marketing_Campaign is in column index 4 -->
                         <p class="campaign"></p>
                     {% endif %}
-                    <p class="stock">In Stock: {{ product[1] }}</p>
+                    <p class="stock">In Stock: {{ product[1] }}</p> <!-- Assuming Quantity_in_stock is index 1 -->
                     <input
                         type="number"
                         name="quantity_{{ product[0] }}"

@@ -118,6 +118,27 @@
             background-color: #0056b3;
         }
 
+        /* Log Out button styling */
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #f76c6c; /* Lighter orange-red color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none; /* Remove underline */
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #f34f4f; /* Darker orange-red */
+        }
+
         @media (max-width: 768px) {
             .product-image {
                 height: 200px;
@@ -127,7 +148,9 @@
 </head>
 <body>
     <h1>Welcome to Ski Clothing Shop</h1>
-
+    <div class="nav">
+        <a href="{{ url_for('welcome_page') }}" class="logout-button">Log Out</a>
+    </div>
     {% if message %}
         <p class="message">{{ message }}</p>
     {% endif %}
