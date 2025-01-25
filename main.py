@@ -117,7 +117,11 @@ def Home_Page():
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             items = cursor.fetchall()
 
-            # Handle Transaction Logic
+            # Track if any items were purchased
+            any_item_purchased = False
+            selected_items = []
+
+            # Generate Order ID before checking quantities
             email = session["email"]
             transaction_date = datetime.now()
             cursor.execute("SELECT MAX(order_id) FROM transactions")
@@ -125,26 +129,28 @@ def Home_Page():
             last_transaction_number = result[0] if result[0] is not None else 0
             new_transaction_number = last_transaction_number + 1
 
-            # Track if any items were purchased
-            any_item_purchased = False
-
-            # Insert the transaction into `transactions` table first
-            cursor.execute("""
-                INSERT INTO transactions (Order_id, Date, Users_Email)
-                VALUES (%s, %s, %s)
-            """, (new_transaction_number, transaction_date, email))
-
-            # Now insert into `transactions_garment` for each item purchased
+            # Track the selected items and their quantities
             for item in items:
                 item_id = int(item[0])  # G_ID
                 try:
                     desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
                 except ValueError:
                     desired_quantity = 0
-                new_quantity = int(item[1]) - desired_quantity
 
-                if desired_quantity > 0:  # Only update for valid purchases
-                    any_item_purchased = True
+                # If any item has a desired quantity greater than 0, add it to the selected_items list
+                if desired_quantity > 0:
+                    selected_items.append((item_id, desired_quantity, item[1]))  # Item ID, Quantity, Stock Quantity
+
+            if selected_items:
+                # Insert the transaction into `transactions` table
+                cursor.execute("""
+                    INSERT INTO transactions (Order_id, Date, Users_Email)
+                    VALUES (%s, %s, %s)
+                """, (new_transaction_number, transaction_date, email))
+
+                # Now insert into `transactions_garment` for each selected item
+                for item_id, desired_quantity, current_stock in selected_items:
+                    new_quantity = current_stock - desired_quantity
 
                     # Insert the garment transaction into `transactions_garment` table
                     cursor.execute("""
@@ -155,13 +161,13 @@ def Home_Page():
                     # Update the stock in the garment table
                     cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
 
-            if any_item_purchased:
                 message = "Thank You for Your Purchase!"
             else:
-                message = "No items were purchased."
+                message = "No items were purchased."  # This will be shown if all quantities are zero
 
-            # Commit all changes
-            connection.commit()
+            # Commit all changes only if there were purchases
+            if selected_items:
+                connection.commit()
 
             # Redirect to avoid form re-submission
             return redirect(url_for("Home_Page", message=message))
@@ -182,66 +188,88 @@ def Home_Page():
     return render_template("Home_Page.html", message=message, products=updated_items)
 
 
+@app.route("/M_Home_Page", methods=["POST", "GET"])
+def M_Home_Page():
+    if 'email' not in session:
+        return redirect("/")  # Redirect to log in if no session exists
 
+    connection, cursor = open_connection()
 
-# @app.route("/M_Home_Page")
-# def M_Home_Page(): ## need to be
-#     if 'email' not in session:
-#         return redirect("/")  # Redirect to log in if no session exists
-#
-#     connection, cursor = open_connection()
-#
-#     try:
-#         if request.method == "POST":
-#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-#             items = cursor.fetchall()
-#
-#             for item in items:
-#                 item_id = int(item[0])  # G_ID
-#                 desired_quantity = int(
-#                     request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
-#                 new_quantity = int(item[1]) - desired_quantity
-#                 if desired_quantity > 0:  # Only update for valid purchases
-#                     cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s",
-#                                    (new_quantity, item_id))
-#
-#             message = "Thank You for Your Purchase!"
-#
-#             # Fetch updated items for display
-#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-#             updated_items = cursor.fetchall()
-#
-#             # Handle Transaction Logic
-#             email = session["email"]
-#             transaction_date = datetime.now()  # Correctly set date
-#             cursor.execute("SELECT MAX(order_id) FROM transactions")
-#             result = cursor.fetchone()
-#             last_transaction_number = result[0] if result[0] is not None else 0
-#             new_transaction_number = last_transaction_number + 1
-#
-#             # insert transaction to DB
-#             cursor.execute("""
-#                 INSERT INTO transactions (Order_id, Date, Users_Email)
-#                 VALUES (%s, %s, %s)
-#             """, (new_transaction_number, transaction_date, email))
-#             # insert transaction garments to DB by pull from html
-#             # cursor.execute("""
-#             #     INSERT INTO transactions_garment (Order_id, Date, Users_Email)
-#             #     VALUES (%s, %s, %s)
-#             # """, (new_transaction_number, transaction_date, email))
-#             connection.commit()
-#         else:
-#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-#             updated_items = cursor.fetchall()
-#             message = request.args.get("message", None)
-#     except Exception as e:
-#         connection.rollback()
-#         message = f"Error: {e}"
-#         updated_items = []
-#     finally:
-#         close_connection(connection, cursor)
-#
-#     return render_template("M_Home_Page.html", message=message, products=updated_items)
+    try:
+        if request.method == "POST":
+            # Fetch items in stock
+            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+            items = cursor.fetchall()
+
+            # Track if any items were purchased
+            any_item_purchased = False
+            selected_items = []
+
+            # Generate Order ID before checking quantities
+            email = session["email"]
+            transaction_date = datetime.now()
+            cursor.execute("SELECT MAX(order_id) FROM transactions")
+            result = cursor.fetchone()
+            last_transaction_number = result[0] if result[0] is not None else 0
+            new_transaction_number = last_transaction_number + 1
+
+            # Track the selected items and their quantities
+            for item in items:
+                item_id = int(item[0])  # G_ID
+                try:
+                    desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+                except ValueError:
+                    desired_quantity = 0
+
+                # If any item has a desired quantity greater than 0, add it to the selected_items list
+                if desired_quantity > 0:
+                    selected_items.append((item_id, desired_quantity, item[1]))  # Item ID, Quantity, Stock Quantity
+
+            if selected_items:
+                # Insert the transaction into `transactions` table
+                cursor.execute("""
+                    INSERT INTO transactions (Order_id, Date, Users_Email)
+                    VALUES (%s, %s, %s)
+                """, (new_transaction_number, transaction_date, email))
+
+                # Now insert into `transactions_garment` for each selected item
+                for item_id, desired_quantity, current_stock in selected_items:
+                    new_quantity = current_stock - desired_quantity
+
+                    # Insert the garment transaction into `transactions_garment` table
+                    cursor.execute("""
+                        INSERT INTO transactions_garment (Quantity, Transactions_Order_ID, Garment_G_ID)
+                        VALUES (%s, %s, %s)
+                    """, (desired_quantity, new_transaction_number, item_id))
+
+                    # Update the stock in the garment table
+                    cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
+
+                message = "Thank You for Your Purchase!"
+            else:
+                message = "No items were purchased."  # This will be shown if all quantities are zero
+
+            # Commit all changes only if there were purchases
+            if selected_items:
+                connection.commit()
+
+            # Redirect to avoid form re-submission
+            return redirect(url_for("Home_Page", message=message))
+
+        else:  # GET request
+            # Fetch items for display
+            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+            updated_items = cursor.fetchall()
+            message = request.args.get("message", None)
+
+    except Exception as e:
+        connection.rollback()
+        message = f"Error: {e}"
+        updated_items = []
+    finally:
+        close_connection(connection, cursor)
+
+    return render_template("M_Home_Page.html", message=message, products=updated_items)
 
 
 @app.route('/Inventory_Update', methods=['GET', 'POST'])
@@ -299,55 +327,6 @@ def inventory_update():
         items = cursor.fetchall()
         close_connection(connection, cursor)
         return render_template('Inventory_Update.html',items=items)
-
-
-
-# @app.route('/Inventory_Update', methods=['GET', 'POST'])
-# def inventory_update():
-#     connection, cursor = open_connection()
-#
-#     if request.method == 'POST':
-#         try:
-#             # Fetch all items from the database
-#             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
-#             items = cursor.fetchall()
-#
-#             # Loop through the items and update their quantities based on the form input
-#             for item in items:
-#                 item_id = item[0]  # G_ID
-#                 new_quantity = request.form.get(f'quantity_{item_id}')  # Get new quantity from the form
-#
-#                 if new_quantity is not None:  # Check if a value was provided
-#                     new_quantity = int(new_quantity)
-#                     # Update the stock in the database
-#                     cursor.execute(
-#                         "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
-#                         (new_quantity, item_id)
-#                     )
-#
-#             # Commit the transaction
-#             connection.commit()
-#             message = "Inventory successfully updated!"
-#
-#             # Fetch the updated items to reflect changes
-#             cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
-#             updated_items = cursor.fetchall()
-#         except Exception as e:
-#             # Roll back in case of error
-#             connection.rollback()
-#             message = f"Error updating inventory: {e}"
-#             updated_items = []  # Return an empty list if an error occurs
-#         finally:
-#             close_connection(connection, cursor)
-#
-#         # Render the template with the updated items
-#         return render_template('Inventory_Update.html', message=message, items=updated_items)
-#
-#     else:  # For GET requests, fetch items to display in the form
-#         cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
-#         items = cursor.fetchall()
-#         close_connection(connection, cursor)
-#         return render_template('Inventory_Update.html', items=items)
 
 
 @app.route("/New_Item", methods=["POST", "GET"])
