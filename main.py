@@ -170,65 +170,64 @@ def Home_Page():
     return render_template("Home_Page.html", message=message, products=updated_items)
 
 
-@app.route("/M_Home_Page")
-def M_Home_Page(): ## need to be
-    if 'email' not in session:
-        return redirect("/")  # Redirect to log in if no session exists
-
-    connection, cursor = open_connection()
-
-    try:
-        if request.method == "POST":
-            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-            items = cursor.fetchall()
-
-            for item in items:
-                item_id = int(item[0])  # G_ID
-                desired_quantity = int(
-                    request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
-                new_quantity = int(item[1]) - desired_quantity
-                if desired_quantity > 0:  # Only update for valid purchases
-                    cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s",
-                                   (new_quantity, item_id))
-
-            message = "Thank You for Your Purchase!"
-
-            # Fetch updated items for display
-            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-            updated_items = cursor.fetchall()
-
-            # Handle Transaction Logic
-            email = session["email"]
-            transaction_date = datetime.now()  # Correctly set date
-            cursor.execute("SELECT MAX(order_id) FROM transactions")
-            result = cursor.fetchone()
-            last_transaction_number = result[0] if result[0] is not None else 0
-            new_transaction_number = last_transaction_number + 1
-
-            # insert transaction to DB
-            cursor.execute("""
-                INSERT INTO transactions (Order_id, Date, Users_Email)
-                VALUES (%s, %s, %s)
-            """, (new_transaction_number, transaction_date, email))
-            # insert transaction garments to DB by pull from html
-            # cursor.execute("""
-            #     INSERT INTO transactions_garment (Order_id, Date, Users_Email)
-            #     VALUES (%s, %s, %s)
-            # """, (new_transaction_number, transaction_date, email))
-            connection.commit()
-        else:
-            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-            updated_items = cursor.fetchall()
-            message = request.args.get("message", None)
-    except Exception as e:
-        connection.rollback()
-        message = f"Error: {e}"
-        updated_items = []
-    finally:
-        close_connection(connection, cursor)
-
-    return render_template("M_Home_Page.html", message=message, products=updated_items)
-
+# @app.route("/M_Home_Page")
+# def M_Home_Page(): ## need to be
+#     if 'email' not in session:
+#         return redirect("/")  # Redirect to log in if no session exists
+#
+#     connection, cursor = open_connection()
+#
+#     try:
+#         if request.method == "POST":
+#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+#             items = cursor.fetchall()
+#
+#             for item in items:
+#                 item_id = int(item[0])  # G_ID
+#                 desired_quantity = int(
+#                     request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+#                 new_quantity = int(item[1]) - desired_quantity
+#                 if desired_quantity > 0:  # Only update for valid purchases
+#                     cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s",
+#                                    (new_quantity, item_id))
+#
+#             message = "Thank You for Your Purchase!"
+#
+#             # Fetch updated items for display
+#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+#             updated_items = cursor.fetchall()
+#
+#             # Handle Transaction Logic
+#             email = session["email"]
+#             transaction_date = datetime.now()  # Correctly set date
+#             cursor.execute("SELECT MAX(order_id) FROM transactions")
+#             result = cursor.fetchone()
+#             last_transaction_number = result[0] if result[0] is not None else 0
+#             new_transaction_number = last_transaction_number + 1
+#
+#             # insert transaction to DB
+#             cursor.execute("""
+#                 INSERT INTO transactions (Order_id, Date, Users_Email)
+#                 VALUES (%s, %s, %s)
+#             """, (new_transaction_number, transaction_date, email))
+#             # insert transaction garments to DB by pull from html
+#             # cursor.execute("""
+#             #     INSERT INTO transactions_garment (Order_id, Date, Users_Email)
+#             #     VALUES (%s, %s, %s)
+#             # """, (new_transaction_number, transaction_date, email))
+#             connection.commit()
+#         else:
+#             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
+#             updated_items = cursor.fetchall()
+#             message = request.args.get("message", None)
+#     except Exception as e:
+#         connection.rollback()
+#         message = f"Error: {e}"
+#         updated_items = []
+#     finally:
+#         close_connection(connection, cursor)
+#
+#     return render_template("M_Home_Page.html", message=message, products=updated_items)
 
 
 @app.route('/Inventory_Update', methods=['GET', 'POST'])
@@ -405,6 +404,14 @@ def new_item():
 
     return render_template("New_Item.html")
 
+@app.route("/Goodbye", methods=["POST", "GET"])
+def Goodbye():
+    return render_template("Goodbye.html")
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return render_template("Welcome_Page.html")
 
 @app.errorhandler(404)
 def invalid_route(e):
