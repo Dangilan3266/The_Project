@@ -112,17 +112,38 @@ def Home_Page():
 
     try:
         if request.method == "POST":
+            # Fetch items in stock
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             items = cursor.fetchall()
 
+            # Handle Transaction Logic
+            email = session["email"]
+            transaction_date = datetime.now()
+            cursor.execute("SELECT MAX(order_id) FROM transactions")
+            result = cursor.fetchone()
+            last_transaction_number = result[0] if result[0] is not None else 0
+            new_transaction_number = last_transaction_number + 1
+
+            # Insert the transaction into `transactions` table
+            cursor.execute("""
+                INSERT INTO transactions (Order_id, Date, Users_Email)
+                VALUES (%s, %s, %s)
+            """, (new_transaction_number, transaction_date, email))
+
             for item in items:
                 item_id = int(item[0])  # G_ID
-                desired_quantity = int(
-                    request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+                desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
                 new_quantity = int(item[1]) - desired_quantity
+
                 if desired_quantity > 0:  # Only update for valid purchases
+                    # Update garment stock
                     cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
 
+                    # Insert the garment transaction into `transactions_garment` table
+                    cursor.execute("""
+                        INSERT INTO transactions_garment (Quantity, Transactions_Order_ID, Garment_G_ID)
+                        VALUES (%s, %s, %s)
+                    """, (desired_quantity, new_transaction_number, item_id))
 
             message = "Thank You for Your Purchase!"
 
@@ -130,30 +151,14 @@ def Home_Page():
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             updated_items = cursor.fetchall()
 
-            # Handle Transaction Logic
-            email = session["email"]
-            transaction_date = datetime.now()  # Correctly set date
-            cursor.execute("SELECT MAX(order_id) FROM transactions")
-            result = cursor.fetchone()
-            last_transaction_number = result[0] if result[0] is not None else 0
-            new_transaction_number = last_transaction_number + 1
-
-            # insert transaction to DB
-            cursor.execute("""
-                INSERT INTO transactions (Order_id, Date, Users_Email)
-                VALUES (%s, %s, %s)
-            """, (new_transaction_number, transaction_date, email))
-
-            # insert transaction garments to DB by pull from html
-            # cursor.execute("""
-            #     INSERT INTO transactions_garment (Order_id, Date, Users_Email)
-            #     VALUES (%s, %s, %s)
-            # """, (new_transaction_number, transaction_date, email))
+            # Commit all changes
             connection.commit()
         else:
+            # Fetch items for GET request
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             updated_items = cursor.fetchall()
             message = request.args.get("message", None)
+
     except Exception as e:
         connection.rollback()
         message = f"Error: {e}"
