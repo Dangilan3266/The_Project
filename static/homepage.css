@@ -17,6 +17,10 @@ body {
     align-items: center;
     justify-content: flex-start;
     overflow-x: hidden;
+    background-image: url("/static/Images/HomePage.jpg");
+    background-size: cover;
+    background-position: top;
+    min-height: 100vh;
 }
 
 /* Heading */
