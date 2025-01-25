@@ -151,7 +151,7 @@ def Home_Page():
         else:
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             updated_items = cursor.fetchall()
-            message = None
+            message = request.args.get("message", None)
     except Exception as e:
         connection.rollback()
         message = f"Error: {e}"
