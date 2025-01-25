@@ -3,6 +3,7 @@ import mysql.connector
 from flask_session.__init__ import Session
 import App.Item
 from datetime import date, datetime
+from werkzeug.utils import secure_filename, os
 
 
 app = Flask(__name__)
@@ -339,15 +340,35 @@ def inventory_update():
 @app.route("/New_Item", methods=["POST", "GET"])
 def new_item():
     if request.method == "POST":
+        # Form inputs
         item_name = request.form.get("Item_Name")
         quantity = request.form.get("Quantity_in_stock")
         campaign = request.form.get("Marketing_Campaign")
         price = request.form.get("price")
+        file = request.files.get("image")
 
         # Validate input
-        if not item_name or not quantity or not price:
+        if not item_name or not quantity or not price or not file:
             return render_template("New_Item.html", message="Please fill in all required fields.")
 
+        # Validate file type
+        allowed_extentions = {'png', 'jpg', 'jpeg', 'gif'}
+
+        def allowed_file(filename):
+            return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extentions
+
+        if not allowed_file(file.filename):
+            return render_template("New_Item.html",
+                                   message="Invalid image format. Please upload PNG, JPG, JPEG, or GIF.")
+
+        # Save the file to /static/Images
+        UPLOAD_FOLDER = './static/Images'
+        app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        # Database operations
         connection, cursor = open_connection()
 
         try:
@@ -355,10 +376,9 @@ def new_item():
             cursor.execute("SELECT * FROM garment WHERE Name = %s", (item_name,))
             result = cursor.fetchone()
             if result:
-                # Product already exists
                 return render_template(
                     "New_Item.html",
-                    message="Product already exists! But hey, you can always update quantity or add a different one",
+                    message="Product already exists! But hey, you can always update quantity or add a different one.",
                 )
 
             # Get the last garment ID
@@ -367,22 +387,22 @@ def new_item():
             last_garment_id = result[0] if result and result[0] is not None else 0
             new_garment_id = last_garment_id + 1
 
-            # Insert the new product
+            # Insert the new product with the image path
             cursor.execute(
-                "INSERT INTO garment (G_ID, Name, Quantity_in_stock, Marketing_Campaign, price) VALUES (%s, %s, %s, %s, %s)",
-                (new_garment_id, item_name, quantity, campaign, price),
+                "INSERT INTO garment (G_ID, Name, Quantity_in_stock, Marketing_Campaign, price, Picture) "
+                "VALUES (%s, %s, %s, %s, %s, %s)",
+                (new_garment_id, item_name, quantity, campaign, price, f'{filename}'),
             )
             connection.commit()
-            return render_template(
-                "New_Item.html", message="Product added successfully! You can add another one here:"
-            )
+            return render_template("New_Item.html", message="Product added successfully! You can add another one here:")
         except Exception as e:
             print(f"Error adding product: {e}")
             return render_template(
-                "New_Item.html", message="An error occurred while adding the product, please try again"
+                "New_Item.html", message="An error occurred while adding the product, please try again."
             )
         finally:
             close_connection(connection, cursor)
+
     return render_template("New_Item.html")
 
 

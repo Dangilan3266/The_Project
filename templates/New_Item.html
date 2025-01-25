@@ -3,51 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>New Item - Fashion TAU</title>
-     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'new_item.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='new_item.css') }}">
 </head>
 <body>
-<!-- Signup Form -->
-        <div>
-            <h1>Add New Product</h1>
-            <div class="message">
+    <div>
+        <h1>Add New Product</h1>
+        <div class="message">
             {% if message %}
                 <p>{{ message }}</p>
             {% endif %}
-            </div>
-            <form  action="/New_Item" method="post">
-                <div class="form-group">
-                    <label for="item_name">Item Name:</label>
-                    <input type="text" id="item_name" name="Item_Name" required>
-                </div>
-                <div class="form-group">
-                    <label for="Quantity_in_stock">Quantity In Stock:</label>
-                    <input type="number" id="Quantity_in_stock" name="Quantity_in_stock" min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="Marketing_Campaign">Marketing_Campaign:</label>
-                    <select id="Marketing_Campaign" name="Marketing_Campaign" required>
-                        <option value="">In Campaign?</option>
-                        <option value="1">Yes</option>
-                        <option value="0">No</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="price">Set Price:</label>
-                    <input type="number" id="price" name="price" min="0" required>
-                </div>
-                <button type="submit" class="btn">Add New Product!</button>
-            </form>
-            <table class="new_item_menu">
-    <tr class="menu_tr">
-        <td class="menu_td">
-            <a class="new_item_form" href="/M_Home_Page">Home Page</a>
-        </td>
-        <td class="menu_td">
-            <a class="new_item_form" href="/Inventory_Update">Inventory Update</a>
-        </td>
-    </tr>
-</table>
-
         </div>
+        <!-- Include enctype for image upload -->
+        <form action="/New_Item" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="item_name">Item Name:</label>
+                <input type="text" id="item_name" name="Item_Name" required>
+            </div>
+            <div class="form-group">
+                <label for="Quantity_in_stock">Quantity In Stock:</label>
+                <input type="number" id="Quantity_in_stock" name="Quantity_in_stock" min="0" required>
+            </div>
+            <div class="form-group">
+                <label for="Marketing_Campaign">Marketing Campaign:</label>
+                <select id="Marketing_Campaign" name="Marketing_Campaign" required>
+                    <option value="">In Campaign?</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="price">Set Price:</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Upload Image (JPG Only):</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn">Add New Product!</button>
+        </form>
+        <table class="inventory_menu">
+            <tr class="menu_tr">
+                <td class="menu_td">
+                    <a class="inventory_form" href="/M_Home_Page">Home Page</a>
+                </td>
+                <td class="menu_td">
+                    <a class="inventory_form" href="/Inventory_Update">Inventory Update</a>
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
