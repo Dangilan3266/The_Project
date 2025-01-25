@@ -9,10 +9,15 @@
 <body>
     <!-- Background overlay -->
     <div class="overlay"></div>
+<div class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="TAU Fashion Logo">
+</div>
 
     <h1>Welcome to Ski Clothing Shop</h1>
     <div class="nav">
         <a href="{{ url_for('welcome_page') }}" class="logout-button">Log Out</a>
+        <a href="{{ url_for('New_Item') }}" class="logout-button">Add New Item</a>
+        <a href="{{ url_for('Inventory_Update') }}" class="logout-button">Update Inventory</a>
     </div>
 
     {% if message %}
