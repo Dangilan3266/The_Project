@@ -250,7 +250,7 @@ def M_Home_Page():
 
                     # Update the stock in the garment table
                     cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
-                connection.commit()
+                    connection.commit()
                 message = "Thank You for Your Purchase!"
                 return redirect(url_for("M_Goodbye", message=message))
             else:
@@ -277,6 +277,7 @@ def M_Home_Page():
 
 @app.route('/Inventory_Update', methods=['GET', 'POST'])
 def Inventory_Update():
+    current_time = datetime.now()
     if 'email' not in session:
         return redirect("/")
 

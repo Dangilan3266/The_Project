@@ -4,6 +4,9 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Goodbye.css') }}">
 </head>
 <body>
+<div class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="TAU Fashion Logo">
+</div>
     <div class="nav">
         <a href="{{ url_for('welcome_page') }}" class="button">Log Out</a>
     </div>
