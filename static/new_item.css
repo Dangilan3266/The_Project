@@ -64,7 +64,7 @@ input:focus, select:focus {
 
 /* Submit Button */
 button.btn {
-    background-color: #007BFF;
+    background-color: black;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -78,30 +78,58 @@ button.btn:hover {
     background-color: #0056b3;
 }
 
-/* Message Styling */
+/* General Message Styling */
 .message {
-    margin-bottom: 10px;
-    text-align: center;
-    font-size: 1rem;
-    display: none; /* Hidden by default */
+    margin: 20px auto; /* Space around the message */
+    text-align: center; /* Centers the text */
+    font-size: 1.3em; /* Adjusted for readability */
+    font-weight: 600; /* Slightly bold for emphasis */
+    color: #fff; /* White text color */
+    background-color: rgba(0, 123, 255, 0.9); /* Default blue background with more visibility */
+    padding: 12px 24px; /* Added balanced padding for better spacing */
+    border-radius: 12px; /* Softer rounded corners */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* Enhanced shadow for a floating effect */
+    max-width: 90%; /* Reduced width for a cleaner look */
+    z-index: 9999; /* Keeps it above other elements */
+    position: relative; /* Position relative for precise placement if needed */
+    transition: all 0.3s ease-in-out; /* Smooth transitions for hover effects */
 }
 
-.message p {
-    padding: 10px;
-    border-radius: 5px;
+/* Success Message */
+.message.success {
+    background-color: rgba(40, 167, 69, 0.95); /* Vibrant green for success */
+    color: #fff;
 }
 
-.message-success {
-    background-color: #DFF2BF;
-    color: #4F8A10;
-    display: block; /* Display if message exists */
+/* Error Message */
+.message.error {
+    background-color: rgba(220, 53, 69, 0.95); /* Vibrant red for error */
+    color: #fff;
 }
 
-.message-error {
-    background-color: #FFBABA;
-    color: #D8000C;
-    display: block; /* Display if message exists */
+/* Fade-in Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
+.message {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Optional: Add hover effect for interaction */
+.message:hover {
+    transform: scale(1.02); /* Slight scaling effect */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Highlight on hover */
+}
+
+
 
 /* Table Styling for Navigation Links */
 table.inventory_menu {
@@ -129,5 +157,5 @@ table.inventory_menu .menu_td a {
 }
 
 table.inventory_menu .menu_td a:hover {
-    color: #FFD700;
+    color: #FFD700;
 }

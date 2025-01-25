@@ -170,7 +170,7 @@ def Home_Page():
                 connection.commit()
 
             # Redirect to avoid form re-submission
-            return redirect(url_for("Home_Page", message=message))
+            return redirect(url_for("Goodbye", message=message))
 
         else:  # GET request
             # Fetch items for display
@@ -252,6 +252,7 @@ def M_Home_Page():
             # Commit all changes only if there were purchases
             if selected_items:
                 connection.commit()
+                return redirect(url_for("Goodbye", message=message))
 
             # Redirect to avoid form re-submission
             return redirect(url_for("Home_Page", message=message))
@@ -297,10 +298,9 @@ def inventory_update():
                             "UPDATE garment SET Quantity_in_stock = %s WHERE G_ID = %s",
                             (new_quantity, item_id)
                         )
-
                         # Log the update in the stock_update table
                         cursor.execute(
-                            "INSERT INTO stock_update (Add_Quantity, Garment_G_ID, Update_Date) VALUES (%s, %s, %s)",
+                            "INSERT INTO stock_update (New_Quantity, Garment_G_ID, Update_Date) VALUES (%s, %s, %s)",
                             (new_quantity, item_id, current_time)
                         )
 
@@ -326,7 +326,8 @@ def inventory_update():
         cursor.execute("SELECT G_ID, Quantity_in_stock, Name FROM garment")
         items = cursor.fetchall()
         close_connection(connection, cursor)
-        return render_template('Inventory_Update.html',items=items)
+        return render_template('Inventory_Update.html', items=items)
+
 
 
 @app.route("/New_Item", methods=["POST", "GET"])

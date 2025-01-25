@@ -8,11 +8,11 @@
 <body>
     <div>
         <h1>Add New Product</h1>
-        <div class="message">
-            {% if message %}
-                <p>{{ message }}</p>
-            {% endif %}
-        </div>
+         {% if message %}
+    <div class="message">
+            <p>{{ message }}</p>
+    </div>
+     {% endif %}
         <!-- Include enctype for image upload -->
         <form action="/New_Item" method="post" enctype="multipart/form-data">
             <div class="form-group">
