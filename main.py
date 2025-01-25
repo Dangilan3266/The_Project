@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
 from flask_session.__init__ import Session
 import App.Item
@@ -125,20 +125,26 @@ def Home_Page():
             last_transaction_number = result[0] if result[0] is not None else 0
             new_transaction_number = last_transaction_number + 1
 
-            # Insert the transaction into `transactions` table
+            # Track if any items were purchased
+            any_item_purchased = False
+
+            # Insert the transaction into `transactions` table first
             cursor.execute("""
                 INSERT INTO transactions (Order_id, Date, Users_Email)
                 VALUES (%s, %s, %s)
             """, (new_transaction_number, transaction_date, email))
 
+            # Now insert into `transactions_garment` for each item purchased
             for item in items:
                 item_id = int(item[0])  # G_ID
-                desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+                try:
+                    desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+                except ValueError:
+                    desired_quantity = 0
                 new_quantity = int(item[1]) - desired_quantity
 
                 if desired_quantity > 0:  # Only update for valid purchases
-                    # Update garment stock
-                    cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
+                    any_item_purchased = True
 
                     # Insert the garment transaction into `transactions_garment` table
                     cursor.execute("""
@@ -146,16 +152,22 @@ def Home_Page():
                         VALUES (%s, %s, %s)
                     """, (desired_quantity, new_transaction_number, item_id))
 
-            message = "Thank You for Your Purchase!"
+                    # Update the stock in the garment table
+                    cursor.execute("UPDATE garment SET Quantity_in_stock = %s WHERE G_id = %s", (new_quantity, item_id))
 
-            # Fetch updated items for display
-            cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
-            updated_items = cursor.fetchall()
+            if any_item_purchased:
+                message = "Thank You for Your Purchase!"
+            else:
+                message = "No items were purchased."
 
             # Commit all changes
             connection.commit()
-        else:
-            # Fetch items for GET request
+
+            # Redirect to avoid form re-submission
+            return redirect(url_for("Home_Page", message=message))
+
+        else:  # GET request
+            # Fetch items for display
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             updated_items = cursor.fetchall()
             message = request.args.get("message", None)
@@ -168,6 +180,8 @@ def Home_Page():
         close_connection(connection, cursor)
 
     return render_template("Home_Page.html", message=message, products=updated_items)
+
+
 
 
 # @app.route("/M_Home_Page")
