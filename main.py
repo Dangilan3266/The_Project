@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
 from flask_session.__init__ import Session
-import App.Item
 from datetime import date, datetime, timedelta
 from werkzeug.utils import secure_filename, os
 

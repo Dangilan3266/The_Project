@@ -128,28 +128,5 @@ class Item:
 
 
 
-    #הורדת מוצר כשמלאי=0 מתצוגה
-    #הכנסת פריט
-    #בדיקה אם קיים קמפיין
-
-
-class User:
-        # מודא קיום בטבלה
-        # רישום
-        # רכישה
-    pass
-
-class Purchase:
-    # בדיקת מלאי DB
-    # עדכון DB
-    pass
-    #building DB columns
-
-# function of init
-
-# func of availability
-
-# func of reducing quantity from stock
-
 
 
