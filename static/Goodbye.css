@@ -9,9 +9,12 @@ body {
 }
 
 .nav {
-    position: fixed;
+    z-index: 3;
+    position: absolute;
     top: 20px;
     left: 20px;
+    display: flex;
+    gap: 10px;
 }
 
 .button {
@@ -85,4 +88,24 @@ h1 {
 .logo img {
     width: 100%;
     height: auto;
+}
+
+.logout-button {
+   padding: 10px 15px;
+   background-color: #f76c6c;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 16px;
+   font-weight: 300;
+   text-align: center;
+   text-decoration: none;
+   transition: background-color 0.3s;
+   position: relative;
+   z-index: 1;
+}
+
+.logout-button:hover {
+   background-color: #f34f4f;
 }

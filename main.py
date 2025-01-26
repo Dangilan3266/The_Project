@@ -1,9 +1,9 @@
+# all imports
 from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
 from flask_session.__init__ import Session
 from datetime import date, datetime, timedelta
 from werkzeug.utils import secure_filename, os
-
 
 app = Flask(__name__)
 
@@ -35,9 +35,7 @@ app.config["SESSION_FILE_DIR"] = "./flask_session"
 app.config["SESSION_FILE_THRESHOLD"] = 100
 Session(app)
 
-# welcome page. here you can login and register as librarian/member
-
-
+# welcome page - log in or sign up as manager / user
 @app.route('/', methods=["GET"])
 def welcome_page():
     return render_template("Welcome_Page.html")
@@ -77,6 +75,7 @@ def login():
 
     else:
         return render_template("Login.html")  # Correct redirection for GET request
+
 
 @app.route("/SignUp" ,methods=["POST", "GET"])
 def signup():
@@ -118,8 +117,7 @@ def Home_Page():
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             items = cursor.fetchall()
 
-            # Track if any items were purchased
-            any_item_purchased = False
+            # Track if any items were purchased by creating list and condition on emptiness
             selected_items = []
 
             # Generate Order ID before checking quantities
@@ -193,8 +191,9 @@ def M_Home_Page():
         return redirect("/")
 
     connection, cursor = open_connection()
+
     try:
-        # Verify if logged in user is a manager
+        # Verify if log in user is a manager
         cursor.execute("SELECT Email FROM Managers WHERE Email = %s", (session['email'],))
         manager = cursor.fetchone()
 
@@ -206,8 +205,7 @@ def M_Home_Page():
             cursor.execute("SELECT * FROM garment WHERE Quantity_in_stock > 0 ORDER BY Marketing_Campaign DESC")
             items = cursor.fetchall()
 
-            # Track if any items were purchased
-            any_item_purchased = False
+            # Track if any items were purchased by creating list and condition on emptiness
             selected_items = []
 
             # Generate Order ID before checking quantities
@@ -222,7 +220,8 @@ def M_Home_Page():
             for item in items:
                 item_id = int(item[0])  # G_ID
                 try:
-                    desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))  # Handle missing quantities gracefully
+                    desired_quantity = int(request.form.get(f'quantity_{item_id}', 0))
+                    # Handle missing quantities gracefully
                 except ValueError:
                     desired_quantity = 0
 
@@ -399,27 +398,30 @@ def New_Item():
         close_connection(connection,cursor)
 
 
+# redirect after purchase is made
 @app.route("/Goodbye", methods=["POST", "GET"])
 def Goodbye():
     return render_template("Goodbye.html")
 
 
+# redirect after purchase is made
 @app.route("/M_Goodbye", methods=["POST", "GET"])
 def M_Goodbye():
     return render_template("M_Goodbye.html")
 
-
+# log out method to clear session and log the user out
 @app.route('/logout')
 def logout():
     session.clear()
-    return render_template("Welcome_Page.html")
+    return redirect(url_for("welcome_page"))
 
 
+# error handler of page not found
 @app.errorhandler(404)
 def invalid_route(e):
     return redirect("/")
 
-
+# RUN
 if __name__ == "__main__":
     app.run(debug=True)
 

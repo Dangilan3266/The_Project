@@ -21,7 +21,7 @@ body {
     /* Change this line: */
     margin: 50px 0 0 50px;  /* top right bottom left */
     /* Or you could use: */
-    /* margin: 50px auto 0 50px; */ /* if you want to keep the right side auto */
+    /* margin: 50px auto 0 50px; / / if you want to keep the right side auto */
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
@@ -109,7 +109,7 @@ h3 {
 
 .message p {
     margin: 0;
-    color: #ff4d4d;
+    color: Black;
 }
 
 /* Sidebar styling */

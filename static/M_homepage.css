@@ -1,178 +1,210 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-    color: #333;
-    position: relative;
-    background-image: url("/static/Images/HomePage.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+   font-family: Arial, sans-serif;
+   margin: 0;
+   padding: 0;
+   background-color: #f9f9f9;
+   color: #333;
+   position: relative;
+   background-image: url("/static/Images/HomePage.jpg");
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
 }
 
-/* Overlay for better text contrast */
 .overlay {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   z-index: 0;
+}
+
+.nav {
+    z-index: 3;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.3); /* Dark overlay */
-    z-index: 0; /* Set to lowest z-index */
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
 }
 
 h1 {
     text-align: center;
-    margin: 20px 0;
+    margin: 80px 0 20px 0; /* Increased top margin */
     color: #fff;
-    z-index: 1; /* Ensure h1 appears above the overlay */
-    position: relative; /* Position relative to the z-index */
-}
-
-.nav {
     z-index: 1;
-    position: absolute;
-    top: 20px;
-    left: 20px;
+    position: relative;
 }
 
 .logout-button {
-    padding: 10px 15px;
-    background-color: #f76c6c;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    text-decoration: none;
-    transition: background-color 0.3s;
-    position: relative; /* Ensure logout button is clickable */
-    z-index: 1;
+   padding: 10px 15px;
+   background-color: #f76c6c;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 16px;
+   font-weight: 300;
+   text-align: center;
+   text-decoration: none;
+   transition: background-color 0.3s;
+   position: relative;
+   z-index: 1;
 }
 
 .logout-button:hover {
-    background-color: #f34f4f;
+   background-color: #f34f4f;
 }
 
-/* Message box */
+.navigation-button {
+   padding: 10px 15px;
+   background-color: #75C2F6;
+   color: white;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 16px;
+   font-weight: 300;
+   text-align: center;
+   text-decoration: none;
+   transition: background-color 0.3s;
+   position: relative;
+   z-index: 1;
+   margin-left: 10px;
+}
+
+.navigation-button:hover {
+   background-color: #78C1F3;
+}
+
 .message {
-    text-align: center;
-    background-color: #d4edda;
-    color: #155724;
-    padding: 10px;
-    margin: 10px auto;
-    width: 80%;
-    border: 1px solid #c3e6cb;
-    border-radius: 5px;
-    z-index: 1;
+   margin: 20px auto;
+   text-align: center;
+   font-size: 1.3em;
+   font-weight: 600;
+   color: #fff;
+   background-color: #f76c6c;
+   padding: 12px 24px;
+   border-radius: 12px;
+   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+   max-width: 30%;
+   z-index: 9999;
+   position: relative;
+   transition: all 0.3s ease-in-out;
 }
 
 .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    z-index: 1;
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+   gap: 15px;
+   padding: 15px;
+   max-width: 1000px;
+   margin: 0 auto;
+   z-index: 2;
+   position: relative;
 }
 
 .product-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative; /* Ensure card is clickable */
-    z-index: 1;
+   background-color: #fff;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+   overflow: hidden;
+   transition: transform 0.2s, box-shadow 0.2s;
+   position: relative;
+   z-index: 1;
+   max-width: 220px;
 }
 
 .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+   transform: translateY(-5px);
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .product-image {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
+   width: 100%;
+   height: 250px;
+   object-fit: cover;
 }
 
 .product-details {
-    padding: 15px;
-    text-align: center;
+   padding: 15px;
+   text-align: center;
 }
 
 .price {
-    font-size: 16px;
-    font-weight: bold;
-    color: #e60023;
+   font-size: 16px;
+   font-weight: bold;
+   color: #e60023;
 }
 
 .campaign {
-    font-size: 14px;
-    color: #007bff;
-    margin: 5px 0;
+   font-size: 14px;
+   color: #007bff;
+   margin: 5px 0;
 }
 
 .stock {
-    font-size: 14px;
-    color: #666;
+   font-size: 14px;
+   color: #666;
 }
 
 .quantity-input {
-    width: 60px;
-    margin: 10px auto;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    text-align: center;
+   width: 60px;
+   margin: 10px auto;
+   padding: 5px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+   text-align: center;
 }
 
 .submit-button {
-    display: block;
-    width: 200px;
-    margin: 20px auto;
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    transition: background-color 0.3s;
-    position: relative; /* Ensure submit button is clickable */
-    z-index: 1;
+   display: block;
+   width: 200px;
+   margin: 20px auto;
+   padding: 10px 15px;
+   background-color: #007bff;
+   color: #fff;
+   border: none;
+   border-radius: 5px;
+   cursor: pointer;
+   font-size: 16px;
+   text-align: center;
+   transition: background-color 0.3s;
+   position: relative;
+   z-index: 1;
 }
 
 .submit-button:hover {
-    background-color: #0056b3;
+   background-color: #0056b3;
 }
 
-@media (max-width: 768px) {
-    .product-image {
-        height: 200px;
-    }
-}
 .logo {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 150px;  /* Adjust size as needed */
-    height: auto;
-    z-index: 1000;
+   position: absolute;
+   top: 30px;
+   right: 30px;
+   width: 120px;
+   height: auto;
+   z-index: 1;
 }
 
 .logo img {
-    width: 100%;
-    height: auto;
+   width: 100%;
+   height: auto;
+}
+
+@media (max-width: 768px) {
+   .product-image {
+       height: 200px;
+   }
+
+   .products-grid {
+       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   }
 }
