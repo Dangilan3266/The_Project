@@ -421,6 +421,7 @@ def logout():
 def invalid_route(e):
     return redirect("/")
 
+
 # RUN
 if __name__ == "__main__":
     app.run(debug=True)
