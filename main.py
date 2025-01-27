@@ -1,7 +1,7 @@
 # all imports
 from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
-from flask_session.__init__ import Session
+from flask_session import Session
 from datetime import date, datetime, timedelta
 from werkzeug.utils import secure_filename, os
 
@@ -408,6 +408,7 @@ def Goodbye():
 @app.route("/M_Goodbye", methods=["POST", "GET"])
 def M_Goodbye():
     return render_template("M_Goodbye.html")
+
 
 # log out method to clear session and log the user out
 @app.route('/logout')
